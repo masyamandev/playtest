@@ -1,0 +1,23 @@
+@(users: Seq[User])(implicit request: Request[AnyContent], user: Option[User])
+
+@main("User list") {
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>email</th>
+        </tr>
+        @for(user <- users) {
+            <tr>
+                <td>@user.name</td>
+                <td>@user.email</td>
+            </tr>
+        }
+        <!--<tr>-->
+            <!--<form action="@routes.Users.addUser()" method="post">-->
+                <!--<td><input name="name"/></td>-->
+                <!--<td><input name="email"/></td>-->
+                <!--<td><input type="submit" value="Add"></td>-->
+            <!--</form>-->
+        <!--</tr>-->
+    </table>
+}

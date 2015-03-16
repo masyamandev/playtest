@@ -1,0 +1,9 @@
+@(form: Form[_])
+
+@if(form.hasGlobalErrors) {
+<ul>
+    @for(err <- form.globalErrors) {
+    <li>@err.message</li>
+    }
+</ul>
+}

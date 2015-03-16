@@ -1,0 +1,11 @@
+@(loginForm: Form[LoginForm])(implicit request: Request[AnyContent], user: Option[User])
+
+@main("Sign in form") {
+    @helper.form(action = routes.Users.login) {
+        <legend>Login</legend>
+        @snippets.errors(loginForm)
+        @helper.inputText(loginForm("email"), '_label -> "Email address:")
+        @helper.inputPassword(loginForm("password"), '_label -> "Password:")
+        <input type='submit' name='Login' value='Login' />
+    }
+}
