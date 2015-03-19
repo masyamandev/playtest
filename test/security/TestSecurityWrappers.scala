@@ -1,12 +1,14 @@
 package security
 
-import models.User
+import models.enums.Permissions
+import models.{Role, User}
 import org.scalatest.FunSuite
 import SecurityService._
 
 class TestSecurityWrappers extends FunSuite {
 
-  implicit val currentUser: User = User("name", "email", "password")
+  implicit val role = new Role("everything", Permissions.values.map(_.toString))
+  implicit val currentUser: User = User("name", "email", "password", role)
 
   def allow[E](e: E) = new AccessChecker[E] ( (entity: E, user: User) => {
       assert(user === currentUser)
@@ -29,7 +31,7 @@ class TestSecurityWrappers extends FunSuite {
   )
 
   test("test postAuthorized passed") {
-    val entity: User = User("otherName", "otherEmail", "password")
+    val entity: User = User("otherName", "otherEmail", "password", role)
 
     def returnEntity(): User = postAuthorize(allow(entity)) {
       entity
@@ -41,7 +43,7 @@ class TestSecurityWrappers extends FunSuite {
   }
 
   test("test postAuthorized denied") {
-    val entity: User = User("otherName", "otherEmail", "password")
+    val entity: User = User("otherName", "otherEmail", "password", role)
 
     def returnEntity(): User = postAuthorize(deny(entity)) {
       entity
@@ -54,7 +56,7 @@ class TestSecurityWrappers extends FunSuite {
 
 
   test("test preAuthorized passed") {
-    val entity: User = User("otherName", "otherEmail", "password")
+    val entity: User = User("otherName", "otherEmail", "password", role)
 
     def returnEntity(): User = preAuthorize(userHasEmail("email")) {
       entity
@@ -67,7 +69,7 @@ class TestSecurityWrappers extends FunSuite {
 
 
   test("test preAuthorized denied") {
-    val entity: User = User("otherName", "otherEmail", "password")
+    val entity: User = User("otherName", "otherEmail", "password", role)
 
     def returnEntity(): User = preAuthorize(userHasEmail("otherEmail")) {
       entity
@@ -80,7 +82,7 @@ class TestSecurityWrappers extends FunSuite {
 
 
   test("test complex postAuthorized passed") {
-    val entity: User = User("otherName", "otherEmail", "password")
+    val entity: User = User("otherName", "otherEmail", "password", role)
 
     def returnEntity(): User = postAuthorize(allow(entity) && userHasEmail("email")) {
       entity
@@ -92,7 +94,7 @@ class TestSecurityWrappers extends FunSuite {
   }
 
   test("test complex postAuthorized denied") {
-    val entity: User = User("otherName", "otherEmail", "password")
+    val entity: User = User("otherName", "otherEmail", "password", role)
 
     def returnEntity(): User = postAuthorize(userHasEmail("wrongEmail") && allow(entity)) {
       entity

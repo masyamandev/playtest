@@ -1,7 +1,7 @@
 @(loginForm: Form[LoginForm])(implicit request: Request[AnyContent], user: Option[User])
 
 @main("Sign in form") {
-    @helper.form(action = routes.Users.login) {
+    @helper.form(action = routes.Login.login) {
         <legend>Login</legend>
         @snippets.errors(loginForm)
         @helper.inputText(loginForm("email"), '_label -> "Email address:")

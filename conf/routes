@@ -4,12 +4,12 @@
 
 # Home page
 GET     /                           controllers.Application.index
+GET     /register                   controllers.Login.registerForm
+POST    /register                   controllers.Login.addUser
+GET     /login                      controllers.Login.loginForm
+POST    /login                      controllers.Login.login
+GET     /logout                     controllers.Login.logout
 GET     /users                      controllers.Users.list
-GET     /users/register             controllers.Users.registerForm
-POST    /users/register             controllers.Users.addUser
-GET     /users/login                controllers.Users.loginForm
-POST    /users/login                controllers.Users.login
-GET     /users/logout               controllers.Users.logout
 GET     /users/:id                  controllers.Users.showUser(id: Long)
 
 # Map static resources from the /public folder to the /assets URL path

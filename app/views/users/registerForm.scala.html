@@ -1,6 +1,7 @@
-@(registerForm: Form[User])(implicit request: Request[AnyContent], user: Option[User])
+@(registerForm: Form[RegisterUserForm])(implicit request: Request[AnyContent], user: Option[User])
+
 @main("Sign up form") {
-    @helper.form(action = routes.Users.addUser) {
+    @helper.form(action = routes.Login.addUser) {
         <legend>Register</legend>
         @snippets.errors(registerForm)
         @helper.inputText(registerForm("name"), '_label -> "UserName:")

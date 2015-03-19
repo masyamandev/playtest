@@ -2,10 +2,11 @@
 
 @if(user.isDefined) {
     Hi, @user.get.name!
-    <a href="@routes.Users.logout()" >Logout</a>
+    (your role is: @user.get.role.name)
+    <a href="@routes.Login.logout()" >Logout</a>
 } else {
     You are not logged in. Please
-    <a href="@routes.Users.loginForm()" >Login</a>
+    <a href="@routes.Login.loginForm()" >Login</a>
     or
-    <a href="@routes.Users.registerForm()" >Register</a>
+    <a href="@routes.Login.registerForm()" >Register</a>
 }

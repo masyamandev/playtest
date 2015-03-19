@@ -1,20 +1,22 @@
 package services
 
+import models.User.UserPersisted
 import models.{DB, User}
 import security.AccessCheckers._
+import security.PasswordHasher
 import security.SecurityService._
 import sorm.Persisted
 import utils.StringUtils
 
 object UserService {
 
-//  def getAllUsersFromDomain(implicit user: User): Seq[User] = {
+//  def getAllUsersFromDomain(implicit user: User): Seq[UserPersisted] = {
 ////    DB.query[User].order("name").fetch()
 //    val domain = StringUtils.getEmailServer(user.email)
 //    DB.query[User].whereLike("email", "%@" + domain).order("name").fetch()
 //  }
 
-  def getAllUsersFromDomain(implicit user: User): Seq[User with Persisted] = postFilter(userRead || idIs(1) || userRead(User("", "@xxx.com", ""))) {
+  def getAllUsersFiltered(implicit user: User): Seq[UserPersisted] = postFilter(userReadable) {
     DB.query[User].order("name").fetch()
   }
 
@@ -22,9 +24,18 @@ object UserService {
 //    DB.query[User].whereEqual("id", id).fetchOne()
 //  }
 
-  def getUserById(id: Long)(implicit user: User): Option[User] = postAuthorizeAllowNone(userRead || idIs(1) || userRead(User("", "@xxx.com", ""))) {
+  def getUserById(id: Long)(implicit user: User): Option[UserPersisted] = postAuthorizeAllowNone(userReadable || idIs(1) /*|| userRead(User("", "@xxx.com", ""))*/) {
 //  def getUserById(id: Long)(implicit user: User): Option[User] = postAuthorize((userRead || idIs(1)).allowIfNone) {
     DB.query[User].whereEqual("id", id).fetchOne()
   }
+
+  def createUser(user: User) = DB.save(user)
+
+  def getUserByEmailAndPassword(email: String, password: String): Option[User] =
+    DB.query[User].whereEqual("email", email).fetchOne()
+    .filter(user => PasswordHasher.checkPassword(password, user.password))
+  def isEmailRegistered(email: String): Boolean = DB.query[User].whereEqual("email", email).exists
+
+  def isNameRegistered(name: String): Boolean = DB.query[User].whereEqual("name", name).exists
 
 }
