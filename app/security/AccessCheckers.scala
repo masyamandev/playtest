@@ -34,14 +34,20 @@ object AccessCheckers {
   )
 
   /**
-   * Check if currently logged in user is able to make changed to user entity.
+   * Check if currently logged in user is able to make changes to user entity.
    */
   def userEdit(userBeforeEdit: UserPersisted) = new AccessChecker[UserPersisted]((userToCheck, user) =>
     user.hasPermission(Permissions.USER_CHANGE_ROLE) || userBeforeEdit.role == userToCheck.role
   ) && userEditable(userBeforeEdit) && userEditable
 
+  /**
+   * Check if user has permission
+   */
   def hasPermission(permission: Permissions.Value) = new AccessChecker0(user => user.hasPermission(permission))
 
+  /**
+   * Check equality of entity's id
+   */
   def idIs(id: Long) = new AccessChecker[Persisted]((entity, user) =>
     entity.id == id
   )

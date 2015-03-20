@@ -104,4 +104,33 @@ class TestSecurityWrappers extends FunSuite {
       returnEntity()
     }
   }
+
+  test("test accessFold lazy invocation") {
+    val result = accessFold(
+      userHasEmail("email1") -> fail("Method should not be invoked"),
+      userHasEmail("email") -> "ok",
+      userHasEmail("email2") -> fail("Method should not be invoked")
+    )
+    assert(result === "ok")
+  }
+
+  test("test accessFold default action") {
+    val result = accessFold(
+      userHasEmail("email1") -> fail("Method should not be invoked"),
+      userHasEmail("email2") -> fail("Method should not be invoked"),
+      userHasEmail("email3") -> fail("Method should not be invoked"),
+      withDefaultValue -> "ok"
+    )
+    assert(result === "ok")
+  }
+
+  test("test accessFold throws AccessDeniedException if no matched rule is found") {
+    intercept[AccessDeniedException] {
+      val result = accessFold(
+        userHasEmail("email1") -> fail("Method should not be invoked"),
+        userHasEmail("email2") -> fail("Method should not be invoked"),
+        userHasEmail("email3") -> fail("Method should not be invoked")
+      )
+    }
+  }
 }
