@@ -12,15 +12,12 @@ import services.{RoleService, UserService}
 import sorm.Persisted
 import utils.FormHelpers._
 
-case class RegisterUserForm(name: String, email: String, password: String, role: Option[String]) {
+case class RegisterUserForm(name: String, email: String, password: String) {
   def toUser: User = User(
     name = this.name,
     email = this.email,
     password = PasswordHasher.hashPassword(this.password),
-    role = this.role match {
-      case None => RoleService.defaultRole
-      case Some(roleId) => RoleService.findByName(roleId) getOrElse RoleService.defaultRole
-    }
+    role = RoleService.defaultRole
   )
 }
 case class LoginForm(email: String, password: String)
@@ -41,8 +38,7 @@ object Login extends Controller with UserSupport {
     mapping (
       "name" -> (nonEmptyText verifying uniqueNameConstraint),
       "email" -> (email verifying uniqueEmailConstraint),
-      "password" -> (nonEmptyText verifying passwordStrengthConstraint),
-      "role" -> optional(text)
+      "password" -> (nonEmptyText verifying passwordStrengthConstraint)
     ) (RegisterUserForm.apply)(RegisterUserForm.unapply)
   )
 
