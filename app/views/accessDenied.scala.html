@@ -1,0 +1,7 @@
+@(exception: exceptions.AccessDeniedException)(implicit request: Request[AnyContent], user: Option[User])
+
+@main("User list") {
+    <h1>403. Access denied</h1>
+    <p>@exception.msg</p>
+    @exception.getStackTrace
+}

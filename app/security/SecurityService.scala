@@ -1,5 +1,6 @@
 package security
 
+import exceptions.AccessDeniedException
 import models.User
 
 import scala.collection.GenTraversable
@@ -69,12 +70,6 @@ class AccessCheckerToLazyVal[+T](val checker: AccessChecker0, aValue: => T) {
   lazy val value: T = aValue
 }
 
-/**
- * Throwed when permission check failed.
- */
-case class AccessDeniedException(msg: String) extends Exception(msg)
-
-
 object SecurityService {
 
   /**
@@ -90,7 +85,7 @@ object SecurityService {
    */
   def preAuthorize[V](predicate: AccessChecker0)(value: => V)(implicit user: User): V = {
     if (predicate.hasAccess) value
-    else throw new AccessDeniedException(s"Access to user ${user} is denied (reason: ${predicate})")
+    else throw AccessDeniedException(s"Access to user ${user} is denied (reason: ${predicate})")
   }
 
   /**
@@ -98,7 +93,7 @@ object SecurityService {
    */
   def postAuthorize[C >: V, V](predicate: AccessChecker[C])(value: V)(implicit user: User): V = {
     if (predicate.hasAccess(value)) value
-    else throw new AccessDeniedException(s"Access to object ${value} to user ${user} is denied (reason: ${predicate})")
+    else throw AccessDeniedException(s"Access to object ${value} to user ${user} is denied (reason: ${predicate})")
   }
 
   /**
@@ -125,7 +120,7 @@ object SecurityService {
   def accessFold[V](cases: AccessCheckerToLazyVal[V]*)(implicit user: User): V = cases find { checkVal: AccessCheckerToLazyVal[V] =>
     checkVal.checker.hasAccess
   } match {
-    case None => throw new AccessDeniedException("Not authorized to get resource")
+    case None => throw AccessDeniedException("Not authorized to get resource")
     case Some(checkVal) => checkVal.value
   }
 
