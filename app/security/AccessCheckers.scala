@@ -10,6 +10,13 @@ import utils.StringUtils._
 object AccessCheckers {
 
   /**
+   * Check if entity user is currently logged in user.
+   */
+  def accessToMe = new AccessChecker[UserPersisted]((userToCheck, user) =>
+    userToCheck.email == user.email // TODO check id instead of email
+  )
+
+  /**
    * Check if currently logged in user is able to read user
    */
   def userReadable = new AccessChecker[User]((userToCheck, user) =>
@@ -31,14 +38,17 @@ object AccessCheckers {
       getEmailServer(userToCheck.email) == getEmailServer(user.email)
     else
       userToCheck.email == user.email
+//      accessToMe.hasAccess(userToCheck)(user)
   )
 
   /**
    * Check if currently logged in user is able to make changes to user entity.
    */
-  def userEdit(userBeforeEdit: UserPersisted) = new AccessChecker[UserPersisted]((userToCheck, user) =>
-    user.hasPermission(Permissions.USER_CHANGE_ROLE) || userBeforeEdit.role == userToCheck.role
-  ) && userEditable(userBeforeEdit) && userEditable
+  def userEdit(userBeforeEdit: UserPersisted) = userEditable && userEditable(userBeforeEdit) &&
+    new AccessChecker[UserPersisted]((userToCheck, user) =>
+      (userBeforeEdit.id == userToCheck.id) &&
+        (user.hasPermission(Permissions.USER_CHANGE_ROLE) || userBeforeEdit.role == userToCheck.role)
+    )
 
   /**
    * Check if user has permission

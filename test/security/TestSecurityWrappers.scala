@@ -1,5 +1,6 @@
 package security
 
+import exceptions.AccessDeniedException
 import models.enums.Permissions
 import models.{Role, User}
 import org.scalatest.FunSuite
@@ -24,9 +25,15 @@ class TestSecurityWrappers extends FunSuite {
     }
   )
 
-  def userHasEmail[String](email: String) = new AccessChecker0 ( (user: User) => {
+  def globalUserHasEmail[String](email: String) = new AccessChecker0 ( (user: User) => {
       assert(user === currentUser)
       user.email == email
+    }
+  )
+
+  def entityUserHasEmail[String](email: String) = new AccessChecker[User] ( (entity: User, user: User) => {
+      assert(user === currentUser)
+      entity.email == email
     }
   )
 
@@ -58,7 +65,7 @@ class TestSecurityWrappers extends FunSuite {
   test("test preAuthorized passed") {
     val entity: User = User("otherName", "otherEmail", "password", role)
 
-    def returnEntity(): User = preAuthorize(userHasEmail("email")) {
+    def returnEntity(): User = preAuthorize(globalUserHasEmail("email")) {
       entity
     }
 
@@ -71,7 +78,7 @@ class TestSecurityWrappers extends FunSuite {
   test("test preAuthorized denied") {
     val entity: User = User("otherName", "otherEmail", "password", role)
 
-    def returnEntity(): User = preAuthorize(userHasEmail("otherEmail")) {
+    def returnEntity(): User = preAuthorize(globalUserHasEmail("otherEmail")) {
       entity
     }
 
@@ -84,7 +91,7 @@ class TestSecurityWrappers extends FunSuite {
   test("test complex postAuthorized passed") {
     val entity: User = User("otherName", "otherEmail", "password", role)
 
-    def returnEntity(): User = postAuthorize(allow(entity) && userHasEmail("email")) {
+    def returnEntity(): User = postAuthorize(allow(entity) && globalUserHasEmail("email")) {
       entity
     }
 
@@ -96,7 +103,7 @@ class TestSecurityWrappers extends FunSuite {
   test("test complex postAuthorized denied") {
     val entity: User = User("otherName", "otherEmail", "password", role)
 
-    def returnEntity(): User = postAuthorize(userHasEmail("wrongEmail") && allow(entity)) {
+    def returnEntity(): User = postAuthorize(globalUserHasEmail("wrongEmail") && allow(entity)) {
       entity
     }
 
@@ -105,20 +112,48 @@ class TestSecurityWrappers extends FunSuite {
     }
   }
 
+  test("test postFilter") {
+    val users = List(
+      User("name1", "email1", "password", role),
+      User("name2", "email2", "password", role),
+      User("name3", "email3", "password", role),
+      User("name4", "email4", "password", role))
+
+    val filtered = postFilter(entityUserHasEmail("email2") || entityUserHasEmail("email3")) { users }
+
+    assert(filtered.size === 2)
+    assert(filtered(0).email === "email2")
+    assert(filtered(1).email === "email3")
+  }
+
+  test("test collection filter") {
+    val users = List(
+      User("name1", "email1", "password", role),
+      User("name2", "email2", "password", role),
+      User("name3", "email3", "password", role),
+      User("name4", "email4", "password", role))
+
+    val filtered = users.filter(entityUserHasEmail("email2") || entityUserHasEmail("email3"))
+
+    assert(filtered.size === 2)
+    assert(filtered(0).email === "email2")
+    assert(filtered(1).email === "email3")
+  }
+
   test("test accessFold lazy invocation") {
     val result = accessFold(
-      userHasEmail("email1") -> fail("Method should not be invoked"),
-      userHasEmail("email") -> "ok",
-      userHasEmail("email2") -> fail("Method should not be invoked")
+      globalUserHasEmail("email1") -> fail("Method should not be invoked"),
+      globalUserHasEmail("email") -> "ok",
+      globalUserHasEmail("email2") -> fail("Method should not be invoked")
     )
     assert(result === "ok")
   }
 
   test("test accessFold default action") {
     val result = accessFold(
-      userHasEmail("email1") -> fail("Method should not be invoked"),
-      userHasEmail("email2") -> fail("Method should not be invoked"),
-      userHasEmail("email3") -> fail("Method should not be invoked"),
+      globalUserHasEmail("email1") -> fail("Method should not be invoked"),
+      globalUserHasEmail("email2") -> fail("Method should not be invoked"),
+      globalUserHasEmail("email3") -> fail("Method should not be invoked"),
       withDefaultValue -> "ok"
     )
     assert(result === "ok")
@@ -127,9 +162,9 @@ class TestSecurityWrappers extends FunSuite {
   test("test accessFold throws AccessDeniedException if no matched rule is found") {
     intercept[AccessDeniedException] {
       val result = accessFold(
-        userHasEmail("email1") -> fail("Method should not be invoked"),
-        userHasEmail("email2") -> fail("Method should not be invoked"),
-        userHasEmail("email3") -> fail("Method should not be invoked")
+        globalUserHasEmail("email1") -> fail("Method should not be invoked"),
+        globalUserHasEmail("email2") -> fail("Method should not be invoked"),
+        globalUserHasEmail("email3") -> fail("Method should not be invoked")
       )
     }
   }

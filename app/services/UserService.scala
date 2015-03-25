@@ -11,7 +11,7 @@ import utils.StringUtils
 
 object UserService {
 
-  def getAllUsersFromDomain(implicit user: User): Seq[UserPersisted] = {
+  private def getAllUsersFromDomain(implicit user: User): Seq[UserPersisted] = {
     val domain = StringUtils.getEmailServer(user.email)
     DB.query[User].whereLike("email", "%@" + domain).order("name").fetch
   }
