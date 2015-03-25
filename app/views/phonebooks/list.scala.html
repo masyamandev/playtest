@@ -1,0 +1,26 @@
+@(phonebooks: Seq[Phonebook.PhonebookPersisted])(implicit request: Request[AnyContent], user: Option[User])
+
+@main("Phonebook list") {
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Actions</th>
+        </tr>
+        @for(phonebook <- phonebooks) {
+            <tr>
+                <td><a href="@routes.Phonebooks.showPhonebook(phonebook.id)">@phonebook.name</a></td>
+                <td>
+                    <form action="@routes.Phonebooks.delete(phonebook.id)" method="post">
+                        <input type="submit" value="Del"/>
+                    </form>
+                </td>
+            </tr>
+        }
+        <tr>
+            @helper.form(action = routes.Phonebooks.add()) {
+                <td><input type="text" name="name"></td>
+                <td><input type="submit" value="Add"></td>
+            }
+        </tr>
+    </table>
+}

@@ -1,0 +1,23 @@
+@(phonebook: Phonebook, persons: Seq[Person])(implicit request: Request[AnyContent], user: Option[User])
+
+@main(s"Phonebook ${phonebook.name}") {
+    Phonebook @phonebook.name
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Contacts</th>
+        </tr>
+        @for(person <- persons) {
+            <tr>
+                <td>@person.name</td>
+                <td>Del</td>
+            </tr>
+        }
+        <!--tr>
+            @helper.form(action = routes.Phonebooks.add()) {
+                <td><input type="text" name="name"></td>
+                <td><input type="submit" value="Add"></td>
+            }
+        </tr-->
+    </table>
+}

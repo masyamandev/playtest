@@ -11,21 +11,21 @@ import utils.StringUtils
 
 object UserService {
 
-  private def getAllUsersFromDomain(implicit user: User): Seq[UserPersisted] = {
-    val domain = StringUtils.getEmailServer(user.email)
+  private def getAllUsersFromDomain(implicit credentials: User): Seq[UserPersisted] = {
+    val domain = StringUtils.getEmailServer(credentials.email)
     DB.query[User].whereLike("email", "%@" + domain).order("name").fetch
   }
-  def getAllUsersFiltered(implicit user: User): Seq[UserPersisted] = accessFold(
+  def getAllUsersFiltered(implicit credentials: User): Seq[UserPersisted] = accessFold(
     hasPermission(Permissions.USER_READ_ALL) -> DB.query[User].order("name").fetch,
     hasPermission(Permissions.USER_READ_SAME_DOMAIN) -> getAllUsersFromDomain,
-    withDefaultValue -> DB.query[User].whereEqual("email", user.email).fetchOne.toSeq
+    withDefaultValue -> DB.query[User].whereEqual("email", credentials.email).fetchOne.toSeq
   )
 
-//  def getAllUsersFiltered(implicit user: User): Seq[UserPersisted] = postFilter(userReadable) {
+//  def getAllUsersFiltered(implicit credentials: User): Seq[UserPersisted] = postFilter(userReadable) {
 //    DB.query[User].order("name").fetch()
 //  }
 
-  def getUserById(id: Long)(implicit user: User): Option[UserPersisted] = postAuthorizeAllowNone(userReadable) {
+  def getUserById(id: Long)(implicit credentials: User): Option[UserPersisted] = postAuthorizeAllowNone(userReadable) {
     DB.query[User].whereEqual("id", id).fetchOne
   }
 

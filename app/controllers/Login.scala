@@ -24,7 +24,7 @@ case class LoginForm(email: String, password: String)
 
 object Login extends Controller with UserSupport {
 
-  val successLoginRedirect = Redirect(routes.Users.list)
+  val successLoginRedirect = Redirect(routes.Phonebooks.list())
 
   def registerForm = wrappedAction { implicit request =>
     Ok(views.html.users.registerForm(userFormData))

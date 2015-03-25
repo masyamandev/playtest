@@ -1,6 +1,6 @@
 package security
 
-import models.User
+import models.{Phonebook, User}
 import models.User.UserPersisted
 import models.enums.Permissions
 import security.SecurityService._
@@ -31,7 +31,7 @@ object AccessCheckers {
   /**
    * Check if currently logged in user is able to edit user
    */
-  def userEditable = new AccessChecker[UserPersisted]((userToCheck, user) =>
+  def userEditable = new AccessChecker[User]((userToCheck, user) =>
     if (user.hasPermission(Permissions.USER_EDIT_ALL))
       true
     else if (user.hasPermission(Permissions.USER_EDIT_SAME_DOMAIN))
@@ -54,6 +54,28 @@ object AccessCheckers {
    * Check if user has permission
    */
   def hasPermission(permission: Permissions.Value) = new AccessChecker0(user => user.hasPermission(permission))
+
+
+  /**
+   * Check if currently logged in user is able to read phonebook
+   */
+  def phonebooksOfUserRead = userReadable
+
+  /**
+   * Check if currently logged in user is able to edit phonebook
+   */
+  def phonebooksOfUserEdit = userEditable
+
+  /**
+   * Check if currently logged in user is able to read phonebook
+   */
+  def phonebookRead = phonebooksOfUserRead[Phonebook](_.user)
+
+  /**
+   * Check if currently logged in user is able to edit phonebook
+   */
+  def phonebookEdit = phonebooksOfUserEdit[Phonebook](_.user)
+
 
   /**
    * Check equality of entity's id

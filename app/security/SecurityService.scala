@@ -34,6 +34,10 @@ class AccessChecker[-T](predicate: (T, Credentials) => Boolean) {
 
   def apply(entity: T) = new AccessChecker0 ( (credentials: Credentials) => this.hasAccess(entity)(credentials))
 
+  def apply[O](transform: O => T): AccessChecker[O] = new AccessChecker[O] ( (entity: O, credentials: Credentials) =>
+    this.hasAccess(transform(entity))(credentials)
+  )
+
   def || [O <: T] (other: AccessChecker[O]) = new AccessChecker[O] ( (entity: O, credentials: Credentials) =>
     this.hasAccess(entity)(credentials) || other.hasAccess(entity)(credentials)
   )

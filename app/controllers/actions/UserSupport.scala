@@ -36,6 +36,7 @@ trait UserSupport {
     } catch {
       case ex: NotLoggedInException => loginFormRedirect
 //      case ex: AccessDeniedException => Forbidden(accessDeniedView(ex))
+//      case ex: NoSuchElementException => Forbidden(accessDeniedView(ex))
     }
   }
 
@@ -50,7 +51,7 @@ trait UserSupport {
     //    }.map(DB.save)
     if (RoleService.findByName(RoleService.DEFAULT_ROLE_NAME).isEmpty) {
       List(
-        Role("GUEST", Set("USER_READ_SAME_DOMAIN")),
+        Role("GUEST", Set()),
         Role("LOCAL_ADMIN", Set("USER_READ_SAME_DOMAIN", "USER_EDIT_SAME_DOMAIN", "USER_CHANGE_ROLE")),
         Role("SUPER_ADMIN", Set("USER_READ_SAME_DOMAIN", "USER_READ_ALL", "USER_EDIT_SAME_DOMAIN", "USER_EDIT_ALL", "USER_CHANGE_ROLE"))
       )
